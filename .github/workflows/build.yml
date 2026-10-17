@@ -14,10 +14,8 @@ jobs:
       - name: Install Build Dependencies
         shell: bash
         run: |
-          brew install ldid
+          brew install ldid dpkg
           echo "$(brew --prefix)/bin" >> "$GITHUB_PATH"
-          command -v ldid
-          ldid -h >/dev/null 2>&1 || true
       - name: Install Theos
         shell: bash
         run: |
@@ -25,33 +23,20 @@ jobs:
           if [ -d "$THEOS_DIR" ]; then
             rm -rf "$THEOS_DIR"
           fi
-          git clone --recursive --depth=1 \
-            https://github.com/theos/theos.git \
-            "$THEOS_DIR"
+          git clone --recursive --depth=1 https://github.com/theos/theos.git "$THEOS_DIR"
           rm -rf "$THEOS_DIR/sdks"
-          git clone --depth=1 \
-            https://github.com/theos/sdks.git \
-            "$THEOS_DIR/sdks"
+          git clone --depth=1 https://github.com/theos/sdks.git "$THEOS_DIR/sdks"
           echo "THEOS=$THEOS_DIR" >> "$GITHUB_ENV"
-      - name: Verify Build Tools
-        shell: bash
-        run: |
-          echo "THEOS=$THEOS"
-          command -v make
-          command -v clang
-          command -v ldid
-          test -f Makefile
-          test -f Tweak.x
-          test -d "$THEOS"
-          test -d "$THEOS/sdks"
       - name: Build Rootless Package
         shell: bash
         run: |
           make clean || true
           make package FINALPACKAGE=1
+          echo "=== Generated DEB files ==="
+          find . -name ".deb"
       - name: Upload DEB Artifact
         uses: actions/upload-artifact@v4
         with:
           name: Unlock120Hz-deb
-          path: packages/.deb
+          path: "/.deb"
           if-no-files-found: error

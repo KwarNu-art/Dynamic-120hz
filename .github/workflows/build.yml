@@ -1,0 +1,38 @@
+name: Build iOS Tweak  
+  
+on:  
+  push:  
+    branches: [ main, master ]  
+  workflow_dispatch:  
+  
+jobs:  
+  build:  
+    runs-on: macos-14  
+  
+    steps:  
+      - name: Checkout Repository  
+        uses: actions/checkout@v4  
+        with:  
+          submodules: recursive  
+  
+      - name: Setup Theos  
+        run: |  
+          git clone --recursive https://github.com/theos/theos.git ${{ runner.temp }}/theos  
+          echo "THEOS=${{ runner.temp }}/theos" >> $GITHUB_ENV  
+  
+      - name: Download iOS SDKs  
+        run: |  
+          git clone --depth=1 https://github.com/theos/sdks.git ${{ runner.temp }}/theos/sdks  
+  
+      - name: Compile and Package Tweak (.deb)  
+        run: |  
+          export THEOS="${{ runner.temp }}/theos"  
+          make clean  
+          make package FINALPACKAGE=1  
+  
+      - name: Upload DEB Artifact  
+        uses: actions/upload-artifact@v4  
+        with:  
+          name: Unlock120Hz-Rootless-DEB  
+          path: packages/*.deb  
+          if-no-files-found: error

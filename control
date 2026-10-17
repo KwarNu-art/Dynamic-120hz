@@ -1,9 +1,9 @@
-Package: com.yourname.unlock120hz  
-Name: Unlock 120Hz  
+Package: com.kwarnu.unlock120hz  
+Name: Dynamic 120Hz  
 Version: 1.0.0  
 Architecture: iphoneos-arm64  
-Description: Force unlock 120Hz for iOS animations  
-Maintainer: Developer  
-Author: Developer  
+Description: Force unlock 120Hz refresh rate on ProMotion devices  
+Maintainer: KwarNu  
+Author: KwarNu  
 Section: Tweaks  
 Depends: mobilesubstrate  

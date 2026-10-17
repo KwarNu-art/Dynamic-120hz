@@ -1,9 +1,0 @@
-Package: com.unlock120hz.tweak  
-Name: Unlock 120Hz  
-Version: 1.0.0  
-Architecture: iphoneos-arm64  
-Description: Unlock and force 120Hz refresh rate for animations and UI.  
-Maintainer: Developer  
-Author: Developer  
-Section: Tweaks  
-Depends: mobilesubstrate

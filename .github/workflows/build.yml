@@ -33,11 +33,11 @@ jobs:
           make clean || true
           make package FINALPACKAGE=1
           mkdir -p output_deb
-          find . -name ".deb" -exec cp {} output_deb/ \;
+          find . -name "*.deb" -not -path "./output_deb/*" -exec cp {} output_deb/ \;
           ls -la output_deb/
       - name: Upload DEB Artifact
         uses: actions/upload-artifact@v4
         with:
           name: Unlock120Hz-deb
-          path: output_deb/.deb
+          path: output_deb/*.deb
           if-no-files-found: error

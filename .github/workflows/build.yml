@@ -1,32 +1,57 @@
-name: Build iOS Tweak  
-  
-on:  
-  push:  
-    branches: [ main, master ]  
-  workflow_dispatch:  
-  
-jobs:  
-  build:  
-    runs-on: macos-14  
-  
-    steps:  
-      - name: Checkout Repository  
-        uses: actions/checkout@v4  
-  
-      - name: Setup Theos  
-        run: |  
-          git clone --recursive https://github.com/theos/theos.git ${{ runner.temp }}/theos  
-          rm -rf ${{ runner.temp }}/theos/sdks  
-          git clone --depth=1 https://github.com/theos/sdks.git ${{ runner.temp }}/theos/sdks  
-          echo "THEOS=${{ runner.temp }}/theos" >> $GITHUB_ENV  
-  
-      - name: Build Rootless DEB  
-        run: |  
-          export THEOS=${{ runner.temp }}/theos  
-          make package FINALPACKAGE=1  
-  
-      - name: Upload DEB Artifact  
-        uses: actions/upload-artifact@v4  
-        with:  
-          name: Unlock120Hz-deb  
-          path: packages/*.deb
+name: Build iOS Tweak
+on:
+  push:
+    branches:
+      - main
+      - master
+  workflow_dispatch:
+jobs:
+  build:
+    runs-on: macos-14
+    steps:
+      - name: Checkout Repository
+        uses: actions/checkout@v4
+      - name: Install Build Dependencies
+        shell: bash
+        run: |
+          brew install ldid
+          echo "$(brew --prefix)/bin" >> "$GITHUB_PATH"
+          command -v ldid
+          ldid -h >/dev/null 2>&1 || true
+      - name: Install Theos
+        shell: bash
+        run: |
+          THEOS_DIR="${RUNNER_TEMP}/theos"
+          if [ -d "$THEOS_DIR" ]; then
+            rm -rf "$THEOS_DIR"
+          fi
+          git clone --recursive --depth=1 \
+            https://github.com/theos/theos.git \
+            "$THEOS_DIR"
+          rm -rf "$THEOS_DIR/sdks"
+          git clone --depth=1 \
+            https://github.com/theos/sdks.git \
+            "$THEOS_DIR/sdks"
+          echo "THEOS=$THEOS_DIR" >> "$GITHUB_ENV"
+      - name: Verify Build Tools
+        shell: bash
+        run: |
+          echo "THEOS=$THEOS"
+          command -v make
+          command -v clang
+          command -v ldid
+          test -f Makefile
+          test -f Tweak.x
+          test -d "$THEOS"
+          test -d "$THEOS/sdks"
+      - name: Build Rootless Package
+        shell: bash
+        run: |
+          make clean || true
+          make package FINALPACKAGE=1
+      - name: Upload DEB Artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: Unlock120Hz-deb
+          path: packages/.deb
+          if-no-files-found: error
